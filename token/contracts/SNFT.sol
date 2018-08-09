@@ -101,11 +101,13 @@ contract SNFT is ERC721, ERC721Metadata, ERC165 {
     function approve(address _approved, uint256 _tokenId) external payable {
         require(msg.sender == tokenOwner[_tokenId]);
         approveAccount[_approved][_tokenId] = msg.sender;
+        emit Approval(msg.sender, _approved, _tokenId);
     }
 
     function setApprovalForAll(address _operator, bool _approved) external {
         require(msg.sender != _operator);
         operatorAccount[msg.sender][_operator] = _approved;
+        emit ApprovalForAll(msg.sender, _operator, _approved);
     }
 
     function getApproved(uint256 _tokenId) external view returns (address) {
@@ -138,6 +140,7 @@ contract SNFT is ERC721, ERC721Metadata, ERC165 {
         tokenBalance[_to]++;
         tokenBalance[_from]--;
         tokenOwner[_tokenId] = _to;
+        emit Transfer(_from, _to, _tokenId);
     }
 
     //ref: https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/AddressUtils.sol

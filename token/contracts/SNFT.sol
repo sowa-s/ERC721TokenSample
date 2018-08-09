@@ -37,6 +37,22 @@ contract SNFT is ERC721, ERC721Metadata, ERC165 {
     mapping(address => mapping(uint256 => address)) approveAccount; //approve_account -> (tokenId -> owner)
     mapping(address => mapping(address => bool)) operatorAccount; //owner_account -> (operator_account -> is approved)
 
+    address owner;
+
+    constructor() public {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+
+    function addToken(address _to, uint256 _tokenId) external onlyOwner {
+        tokenBalance[_to]++;
+        tokenOwner[_tokenId] = _to;
+    }
+
     //ERC721 methods
     function balanceOf(address _owner) external view returns (uint256){
         return tokenBalance[_owner];
@@ -64,6 +80,8 @@ contract SNFT is ERC721, ERC721Metadata, ERC165 {
     }
 
     function transferFrom(address _from, address _to, uint256 _tokenId) external payable {
+        require(tokenOwner[_tokenId] == _from);
+
         if(approveAccount[msg.sender][_tokenId] == _from){
             _transfer(_from, _to, _tokenId);
             delete approveAccount[msg.sender][_tokenId];

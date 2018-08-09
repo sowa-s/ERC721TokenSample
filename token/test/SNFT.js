@@ -28,4 +28,69 @@ contract('SNFT', function(accounts) {
         });
     });
 
+    it('should create token by owner', function(){
+        var token;
+        return snft.deployed().then(function(instance){
+            token = instance;
+            return token.addToken(accounts[0], 1234);
+        }).then(function(){
+            return token.ownerOf.call(1234);
+        }).then(function(addr){
+            assert.equal(addr, accounts[0]);
+        });
+    });
+
+    it('should transfer own token', function(){
+        var token;
+        return snft.deployed().then(function(instance){
+            token = instance;
+            return token.addToken(accounts[0], 1234);
+        }).then(function(){
+            return token.transferFrom(accounts[0], accounts[1], 1234);
+        }).then(function(){
+            return token.ownerOf.call(1234);
+        }).then(function(addr){
+            assert.equal(addr, accounts[1]);
+        });
+    });
+
+    it('should approve user', function(){
+        var token;
+        return snft.deployed().then(function(instance){
+            token = instance;
+            return token.addToken(accounts[0], 1234);
+        }).then(function(){
+            return token.approve(accounts[1], 1234);
+        }).then(function(){
+            return token.transferFrom(accounts[0], accounts[2], 1234, {from: accounts[1]});
+        }).then(function(){
+            return token.ownerOf.call(1234);
+        }).then(function(addr){
+            assert.equal(addr, accounts[2]);
+            return token.getApproved.call(1234);
+        }).then(function(addr){
+            assert.equal(addr, "0x0000000000000000000000000000000000000000");
+        });
+    });
+
+    it('should add operator user', function(){
+        var token;
+        return snft.deployed().then(function(instance){
+            token = instance;
+            return token.addToken(accounts[0], 1234);
+        }).then(function(){
+            return token.setApprovalForAll(accounts[1], true);
+        }).then(function(){
+            return token.transferFrom(accounts[0], accounts[2], 1234, {from: accounts[1]});
+        }).then(function(){
+            return token.ownerOf.call(1234);
+        }).then(function(addr){
+            assert.equal(addr, accounts[2]);
+            return token.getApproved.call(1234);
+        });
+    });
+
+
+    //TODO: safeTransferFromのテストを追加
+    //TODO: Failケースのテストを追加
 });
